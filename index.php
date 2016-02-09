@@ -16,157 +16,81 @@
 				<h1>Feed Template</h1>
 			</div>
 		</div>
+	
+	<?php
+		// define script parameters
+	  //$BLOGURL    = "http://sxp.microsoft.com/feeds/3.0/msdntn?tags=msit";
+	$BLOGURL    = "http://feeds.bbci.co.uk/news/rss.xml?edition=int";
+	  $NUMITEMS   = 2;
+	  $TIMEFORMAT = "j F Y, g:ia";
+	  $CACHEFILE  = "/tmp/" . md5($BLOGURL);
+	  $CACHETIME  = 4; // hours
+
+	  // download the feed iff a cached version is missing or too old
+	  if(!file_exists($CACHEFILE) || ((time() - filemtime($CACHEFILE)) > 3600 * $CACHETIME)) {
+	    if($feed_contents = http_get_contents($BLOGURL)) {
+	      // write feed contents to cache file
+	      $fp = fopen($CACHEFILE, 'w');
+	      fwrite($fp, $feed_contents);
+	      fclose($fp);
+	    }
+	  }
+
+	  include "class.myrssparser.php";
+	  $rss_parser = new myRSSParser($CACHEFILE);
+
+	  // read feed data from cache file
+	  $feeddata = $rss_parser->getRawOutput();
+	  extract($feeddata['RSS']['CHANNEL'][0], EXTR_PREFIX_ALL, 'rss');
+
+	  // display leading image
+	  if(isset($rss_IMAGE[0]) && $rss_IMAGE[0]) {
+	    extract($rss_IMAGE[0], EXTR_PREFIX_ALL, 'img');
+	    echo "<p><a title=\"{$img_TITLE}\" href=\"{$img_LINK}\"><img src=\"{$img_URL}\" alt=\"\"></a></p>\n";
+	  }
+
+	  // display feed title
+	  echo "<h4><a title=\"",htmlspecialchars($rss_DESCRIPTION),"\" href=\"{$rss_LINK}\" target=\"_blank\">";
+	  echo htmlspecialchars($rss_TITLE);
+	  echo "</a></h4>\n";
+
+	  // display feed items
+	  $count = 0;
+	  foreach($rss_ITEM as $itemdata) {
+	    echo "<p><b><a href=\"{$itemdata['LINK']}\" target=\"_blank\">";
+	    echo htmlspecialchars(stripslashes($itemdata['TITLE']));
+	    echo "</a></b><br>\n";
+	    echo htmlspecialchars(stripslashes($itemdata['DESCRIPTION'])),"<br>\n";
+	    echo "<i>",date($TIMEFORMAT, strtotime($itemdata['PUBDATE'])),"</i></p>\n\n";
+	    if(++$count >= $NUMITEMS) break;
+	  }
+
+	  // display copyright information
+	  echo "<p><small>&copy; {",htmlspecialchars($rss_COPYRIGHT),"}</small></p>\n";
+	?>
 	</div>
-	<div class="row">
-		<div class="large-3 columns">
-			<div class="panel">
-				<a href="#"><img src="http://placehold.it/300x240&text=[img]"></a>
-				<h5><a href="#">Your Name</a></h5>
-				<div class="section-container vertical-nav" data-options=
-				"deep_linking: false; one_up: true" data-section="">
-					<section class="section">
-						<h5 class="title"><a href="#">Section 1</a></h5>
-					</section>
-					<section class="section">
-						<h5 class="title"><a href="#">Section 2</a></h5>
-					</section>
-					<section class="section">
-						<h5 class="title"><a href="#">Section 3</a></h5>
-					</section>
-					<section class="section">
-						<h5 class="title"><a href="#">Section 4</a></h5>
-					</section>
-					<section class="section">
-						<h5 class="title"><a href="#">Section 5</a></h5>
-					</section>
-					<section class="section">
-						<h5 class="title"><a href="#">Section 6</a></h5>
-					</section>
-				</div>
-			</div>
-		</div>
-		<div class="large-6 columns">
-			<div class="row">
-				<div class="large-2 columns small-3"><img src=
-				"http://placehold.it/80x80&text=[img]"></div>
-				<div class="large-10 columns">
-					<p><strong>Some Person said:</strong> Bacon ipsum dolor sit amet nulla ham
-					qui sint exercitation eiusmod commodo, chuck duis velit. Aute in
-					reprehenderit, dolore aliqua non est magna in labore pig pork biltong.</p>
-					<ul class="inline-list">
-						<li>
-							<a href="">Reply</a>
-						</li>
-						<li>
-							<a href="">Share</a>
-						</li>
-					</ul>
-					<h6>2 Comments</h6>
-					<div class="row">
-						<div class="large-2 columns small-3"><img src=
-						"http://placehold.it/50x50&text=[img]"></div>
-						<div class="large-10 columns">
-							<p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod
-							commodo, chuck duis velit. Aute in reprehenderit</p>
-						</div>
-					</div>
-					<div class="row">
-						<div class="large-2 columns small-3"><img src=
-						"http://placehold.it/50x50&text=[img]"></div>
-						<div class="large-10 columns">
-							<p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod
-							commodo, chuck duis velit. Aute in reprehenderit</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<hr>
-			<div class="row">
-				<div class="large-2 columns small-3"><img src=
-				"http://placehold.it/80x80&text=[img]"></div>
-				<div class="large-10 columns">
-					<p><strong>Some Person said:</strong> Bacon ipsum dolor sit amet nulla ham
-					qui sint exercitation eiusmod commodo, chuck duis velit. Aute in
-					reprehenderit, dolore aliqua non est magna in labore pig pork biltong.</p>
-					<ul class="inline-list">
-						<li>
-							<a href="">Reply</a>
-						</li>
-						<li>
-							<a href="">Share</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<hr>
-			<div class="row">
-				<div class="large-2 columns small-3"><img src=
-				"http://placehold.it/80x80&text=[img]"></div>
-				<div class="large-10 columns">
-					<p><strong>Some Person said:</strong> Bacon ipsum dolor sit amet nulla ham
-					qui sint exercitation eiusmod commodo, chuck duis velit. Aute in
-					reprehenderit, dolore aliqua non est magna in labore pig pork biltong.</p>
-					<ul class="inline-list">
-						<li>
-							<a href="">Reply</a>
-						</li>
-						<li>
-							<a href="">Share</a>
-						</li>
-					</ul>
-					<h6>2 Comments</h6>
-					<div class="row">
-						<div class="large-2 columns small-3"><img src=
-						"http://placehold.it/50x50&text=[img]"></div>
-						<div class="large-10 columns">
-							<p>Bacon ipsum dolor sit amet nulla ham qui sint exercitation eiusmod
-							commodo, chuck duis velit. Aute in reprehenderit</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<aside class="large-3 columns hide-for-small">
-			<p><img src="http://placehold.it/300x440&text=[ad]"></p>
-			<p><img src="http://placehold.it/300x440&text=[ad]"></p>
-		</aside>
-	</div>
-	<footer class="row">
-		<div class="large-12 columns">
-			<hr>
-			<div class="row">
-				<div class="large-5 columns">
-					<p>&copy; Copyright no one at all. Go to town.</p>
-				</div>
-				<div class="large-7 columns">
-					<ul class="inline-list right">
-						<li>
-							<a href="#">Section 1</a>
-						</li>
-						<li>
-							<a href="#">Section 2</a>
-						</li>
-						<li>
-							<a href="#">Section 3</a>
-						</li>
-						<li>
-							<a href="#">Section 4</a>
-						</li>
-						<li>
-							<a href="#">Section 5</a>
-						</li>
-						<li>
-							<a href="#">Section 6</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</footer>
 	<script src="js/vendor/jquery.js"></script>
     <script src="js/foundation.min.js"></script>
     <script>
       $(document).foundation();
     </script>
+    <script type="text/javascript" src="ajaxrequest.js"></script>
+    <script type="text/javascript">
+
+	  var delay = 5000;
+
+	  function updateRSS(index)
+	  {
+	    if(encodeURIComponent) {
+	      var req = new AjaxRequest();
+	      req.loadXMLDoc('updaterss.php', 'index=' + index);
+	      setTimeout('updateRSS(' + (++index) + ')', delay);
+	    }
+	  }
+
+	  setTimeout('updateRSS(1)', delay);
+
+	</script>
+	
 </body>
 </html>
